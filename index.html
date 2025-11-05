@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Farmácia Aura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect"  href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bp:#ffd6e8;--bps:#ffb3d1;--bg:linear-gradient(#fff,#f6f7f8);
+      --brand:#e53935;--text:#243023;--card:#fff;--muted:#6b6b6b;
+      --radius:14px;--gap:14px;--shadow:0 10px 30px rgba(0,0,0,.08);
+      --transition: all 0.25s ease;
+      --scrollbar-thumb:#c0c0c0;--scrollbar-track:#f1f1f1;
+    }
+    :root[data-theme="pink"]{--bg:linear-gradient(135deg, #fffafc, #ffe8f5);--brand:#ff5fa0;--card:#fff;}
+    :root[data-theme="green"]{--bg:linear-gradient(135deg, #fbfff9, #e6f7ed);--brand:#2f9d6e;--card:#fff;}
+    :root[data-theme="neutral"]{--bg:linear-gradient(135deg, #f8f9fa, #e9ecef);--brand:#495057;--card:#fff;}
+    :root[data-theme="dark"]{
+      --bg:linear-gradient(135deg, #1a1a1a, #2d2d2d);--brand:#ff6b9d;--text:#e9ecef;
+      --card:#2d2d2d;--muted:#adb5bd;--shadow:0 10px 30px rgba(0,0,0,.3);
+      --scrollbar-thumb:#555;--scrollbar-track:#333;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter',system-ui,Segoe UI,Roboto,Arial;
+      min-height:100vh;background:var(--bg);color:var(--text);
+      padding:18px;transition:var(--transition);overflow:hidden;
+    }
+
+    /* === BARRA DE ROLAGEM PERSONALIZADA === */
+    ::-webkit-scrollbar{width:12px}
+    ::-webkit-scrollbar-track{background:var(--scrollbar-track);border-radius:6px}
+    ::-webkit-scrollbar-thumb{
+      background:var(--scrollbar-thumb);border-radius:6px;
+      border:3px solid var(--scrollbar-track);
+      transition:background .2s;
+    }
+    ::-webkit-scrollbar-thumb:hover{background:var(--brand)}
+    /* Firefox */
+    *{scrollbar-width:thin;scrollbar-color:var(--scrollbar-thumb) var(--scrollbar-track)}
+
+    /* === TELA DE INÍCIO === */
+    #splash{
+      position:fixed;inset:0;background:var(--bg);z-index:9999;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:24px;opacity:1;transition:opacity 0.8s ease;
+    }
+    #splash.hidden{opacity:0;pointer-events:none;}
+    #splash .logo{
+      width:120px;height:120px;background:var(--brand);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;color:#fff;
+      font-size:2.5rem;font-weight:800;animation:pulse 2s infinite;
+    }
+    #splash h1{
+      font-size:2.2rem;font-weight:800;letter-spacing:-1px;
+      background:linear-gradient(90deg, var(--brand), #ff8fb3);
+      -webkit-background-clip:text;background-clip:text;
+      -webkit-text-fill-color:transparent;color:transparent;
+    }
+    #splash p{
+      font-size:1rem;color:var(--muted);max-width:320px;text-align:center;
+    }
+    #enterBtn{
+      margin-top:20px;padding:14px 32px;font-size:1.1rem;font-weight:700;
+      background:var(--brand);color:#fff;border:none;border-radius:12px;
+      cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.15);
+      transition:transform .2s, box-shadow .2s;
+    }
+    #enterBtn:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.2);}
+    #enterBtn:active{transform:translateY(0);}
+
+    @keyframes pulse{
+      0%,100%{transform:scale(1)}
+      50%{transform:scale(1.1)}
+    }
+
+    /* === LOJA PRINCIPAL === */
+    .main-content{opacity:0;transition:opacity 0.6s ease;pointer-events:none;}
+    .main-content.visible{opacity:1;pointer-events:auto;overflow-y:auto;height:100vh;padding-bottom:60px;}
+
+    .header{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
+    .brand{font-weight:800;font-size:1.4rem;letter-spacing:-0.5px}
+    .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .input{
+      padding:10px 16px;border-radius:999px;border:1px solid rgba(0,0,0,.1);
+      min-width:220px;font-size:0.95rem;transition:var(--transition);outline:none;
+    }
+    .input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(var(--brand-rgb,255,95,160),.2);}
+    .btn{
+      padding:9px 14px;border-radius:10px;border:1px solid rgba(0,0,0,.1);
+      background:var(--card);cursor:pointer;font-weight:600;
+      transition:var(--transition);font-size:0.9rem;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1);}
+    .btn[data-active="true"]{background:var(--brand);color:#fff;border-color:var(--brand);}
+    .theme-btn{
+      background:linear-gradient(90deg,var(--bps,#ffb3d1),var(--bp,#ffd6e8));
+      color:#491f2c;border:0;font-weight:700;display:flex;align-items:center;gap:6px;
+    }
+    #filters{display:flex;gap:6px;flex-wrap:wrap}
+    #products{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+      gap:var(--gap);animation:fadeIn 0.5s ease-out;
+    }
+    .card{
+      background:var(--card);padding:14px;border-radius:var(--radius);
+      box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;
+      transition:var(--transition);opacity:0;transform:translateY(10px);
+      animation:cardIn 0.4s forwards;
+    }
+    .card h3{margin:0;font-size:1.05rem;font-weight:600;line-height:1.3}
+    .meta{font-size:.88rem;color:var(--muted)}
+    .price{color:var(--brand);font-weight:700;font-size:1.1rem;margin-top:auto}
+    .small{font-size:.82rem;color:var(--muted)}
+    .hidden{display:none!important}
+    .highlight{background:#fff3cd;color:#856404;padding:0 2px;border-radius:3px}
+
+    /* Cart Modal */
+    #cart{
+      position:fixed;right:16px;top:16px;width:340px;max-height:80vh;
+      background:var(--card);padding:16px;border-radius:14px;
+      box-shadow:0 20px 60px rgba(0,0,0,.15);z-index:1000;
+      overflow-y:auto;transform:scale(0.95);opacity:0;
+      transition:transform .25s ease, opacity .25s ease;
+    }
+    #cart.open{transform:scale(1);opacity:1}
+    .cart-item{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .qty-controls button{
+      width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.1);
+      background:var(--card);font-weight:bold;cursor:pointer;
+    }
+    .total{font-weight:700;font-size:1.1rem;margin:12px 0;color:var(--brand)}
+
+    /* Toast */
+    #toast{
+      position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+      background:#333;color:#fff;padding:10px 20px;border-radius:8px;
+      font-size:0.9rem;z-index:1001;opacity:0;
+      transition:opacity .3s, transform .3s;pointer-events:none;
+    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(-10px);}
+
+    @keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+    @media (max-width:700px){
+      .controls{flex-direction:column;align-items:stretch;width:100%}
+      .input{min-width:0;width:100%}
+      #filters{justify-content:center}
+      .header{flex-direction:column;align-items:stretch}
+      #splash h1{font-size:1.8rem}
+      #splash .logo{width:100px;height:100px;font-size:2rem}
+      ::-webkit-scrollbar{width:8px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- === TELA DE INÍCIO === -->
+<div id="splash">
+  <div class="logo">A</div>
+  <h1>Farmácia Aura</h1>
+  <p>Bem-vindo à sua farmácia natural, completa e acessível.</p>
+  <button id="enterBtn">Entrar na Loja</button>
+</div>
+
+<!-- === LOJA PRINCIPAL === -->
+<div class="main-content" id="mainContent">
+  <header class="header">
+    <div class="brand">Farmácia Aura</div>
+    <div class="controls">
+      <input id="q" class="input" placeholder="Buscar produto..." aria-label="Buscar produtos" />
+      <div id="filters" role="tablist" aria-label="Filtrar por categoria">
+        <button class="btn" data-cat="all" aria-pressed="true">Todos</button>
+        <button class="btn" data-cat="medicines">Remédios</button>
+        <button class="btn" data-cat="natural">Naturais Amazônicos</button>
+        <button class="btn" data-cat="hygiene">Higiene</button>
+        <button class="btn" data-cat="food">Alimentos</button>
+      </div>
+      <button id="theme" class="btn theme-btn" aria-label="Alternar tema">Tema</button>
+      <button id="cartBtn" class="btn" aria-label="Abrir carrinho">
+        Carrinho (<span id="count">0</span>)
+      </button>
+    </div>
+  </header>
+
+  <section id="products" aria-label="Lista de produtos">
+    <!-- Higiene -->
+    <div class="card" data-cat="hygiene"><h3>Shampoo Natural</h3><div class="small">250 ml</div><div class="meta">Sem sulfato</div><div class="price">R$29,90</div><button class="btn add" data-id="p1" data-name="Shampoo Natural" data-price="29.9">Adicionar</button></div>
+    <div class="card" data-cat="hygiene"><h3>Sabonete Vegano</h3><div class="small">100 g</div><div class="meta">Ingredientes orgânicos</div><div class="price">R$12,50</div><button class="btn add" data-id="p2" data-name="Sabonete Vegano" data-price="12.5">Adicionar</button></div>
+    <div class="card" data-cat="hygiene"><h3>Creme Hidratante</h3><div class="small">100 ml</div><div class="meta">Manteiga de karité</div><div class="price">R$34,00</div><button class="btn add" data-id="p3" data-name="Creme Hidratante" data-price="34.0">Adicionar</button></div>
+    <div class="card" data-cat="hygiene"><h3>Creme Dental Natural</h3><div class="small">90 g</div><div class="meta">Fluoreto moderado</div><div class="price">R$11,20</div><button class="btn add" data-id="p4" data-name="Creme Dental Natural" data-price="11.2">Adicionar</button></div>
+
+    <!-- Remédios Convencionais -->
+    <div class="card" data-cat="medicines"><h3>Paracetamol 500mg</h3><div class="small">20 comp.</div><div class="meta">Analgésico</div><div class="price">R$7,90</div><button class="btn add" data-id="m1" data-name="Paracetamol 500mg" data-price="7.9">Adicionar</button></div>
+    <div class="card" data-cat="medicines"><h3>Ibuprofeno 400mg</h3><div class="small">20 comp.</div><div class="meta">Anti-inflamatório</div><div class="price">R$9,50</div><button class="btn add" data-id="m2" data-name="Ibuprofeno 400mg" data-price="9.5">Adicionar</button></div>
+    <div class="card" data-cat="medicines"><h3>Antiácido mastigável</h3><div class="small">12 pastilhas</div><div class="meta">Alívio de azia</div><div class="price">R$13,30</div><button class="btn add" data-id="m3" data-name="Antiácido mastigável" data-price="13.3">Adicionar</button></div>
+    <div class="card" data-cat="medicines"><h3>Spray Nasal Salino</h3><div class="small">100 ml</div><div class="meta">Higienização nasal</div><div class="price">R$18,40</div><button class="btn add" data-id="m4" data-name="Spray Nasal Salino" data-price="18.4">Adicionar</button></div>
+    <div class="card" data-cat="medicines"><h3>Multivitamínico</h3><div class="small">30 cáps</div><div class="meta">Vitaminas diárias</div><div class="price">R$39,90</div><button class="btn add" data-id="m5" data-name="Multivitamínico" data-price="39.9">Adicionar</button></div>
+    <div class="card" data-cat="medicines"><h3>Curativo adesivo</h3><div class="small">10 uni</div><div class="meta">Primeiros socorros</div><div class="price">R$8,00</div><button class="btn add" data-id="m6" data-name="Curativo adesivo" data-price="8.0">Adicionar</button></div>
+
+    <!-- Remédios Naturais Amazônicos -->
+    <div class="card" data-cat="natural"><h3>Óleo de Andiroba</h3><div class="small">30 ml</div><div class="meta">Anti-inflamatório • Repelente natural</div><div class="price">R$22,50</div><button class="btn add" data-id="na1" data-name="Óleo de Andiroba" data-price="22.5">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Assacú em Pó</h3><div class="small">100 g</div><div class="meta">Digestivo • Alívio de cólicas</div><div class="price">R$17,90</div><button class="btn add" data-id="na2" data-name="Assacú em Pó" data-price="17.9">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Porangaba Chá</h3><div class="small">20 saq.</div><div class="meta">Diurético • Emagrecimento</div><div class="price">R$13,80</div><button class="btn add" data-id="na3" data-name="Chá de Porangaba" data-price="13.8">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Guaraná em Pó</h3><div class="small">150 g</div><div class="meta">Estimulante • Energético natural</div><div class="price">R$28,00</div><button class="btn add" data-id="na4" data-name="Guaraná em Pó" data-price="28.0">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Una de Gato Chá</h3><div class="small">15 saq.</div><div class="meta">Imunidade • Anti-inflamatório</div><div class="price">R$19,50</div><button class="btn add" data-id="na5" data-name="Chá de Una de Gato" data-price="19.5">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Centaurea Asiática</h3><div class="small">50 g</div><div class="meta">Cicatrizante • Varizes e eczema</div><div class="price">R$15,20</div><button class="btn add" data-id="na6" data-name="Centelha Asiática" data-price="15.2">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Ayahuasca Chá (Rituais)</h3><div class="small">10 saq.</div><div class="meta">Espiritual • Purificação (uso ritual)</div><div class="price">R$35,00</div><button class="btn add" data-id="na7" data-name="Chá de Ayahuasca" data-price="35.0">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Jaborandi Folhas</h3><div class="small">80 g</div><div class="meta">Estimulante capilar • Queda de cabelo</div><div class="price">R$20,90</div><button class="btn add" data-id="na8" data-name="Folhas de Jaborandi" data-price="20.9">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Graviola Cápsulas</h3><div class="small">60 cáps</div><div class="meta">Antioxidante • Suporte imunológico</div><div class="price">R$24,70</div><button class="btn add" data-id="na9" data-name="Cápsulas de Graviola" data-price="24.7">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Pau D'Arco Chá</h3><div class="small">25 saq.</div><div class="meta">Antifúngico • Infecções</div><div class="price">R$16,40</div><button class="btn add" data-id="na10" data-name="Chá de Pau D'Arco" data-price="16.4">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Cat's Claw (Una de Gato)</h3><div class="small">40 g</div><div class="meta">Artrite • Inflamações</div><div class="price">R$21,30</div><button class="btn add" data-id="na11" data-name="Una de Gato" data-price="21.3">Adicionar</button></div>
+    <div class="card" data-cat="natural"><h3>Aroeira Frutos</h3><div class="small">60 g</div><div class="meta">Anti-inflamatório • Cicatrizante</div><div class="price">R$14,60</div><button class="btn add" data-id="na12" data-name="Frutos de Aroeira" data-price="14.6">Adicionar</button></div>
+
+    <!-- Alimentos -->
+    <div class="card" data-cat="food"><h3>Chocolate 70%</h3><div class="small">80 g</div><div class="meta">Sem glúten</div><div class="price">R$8,90</div><button class="btn add" data-id="f1" data-name="Chocolate 70%" data-price="8.9">Adicionar</button></div>
+    <div class="card" data-cat="food"><h3>Chá Camomila</h3><div class="small">18 saq.</div><div class="meta">Calmante</div><div class="price">R$9,20</div><button class="btn add" data-id="f2" data-name="Chá Camomila" data-price="9.2">Adicionar</button></div>
+    <div class="card" data-cat="food"><h3>Mel Puro</h3><div class="small">250g</div><div class="meta">Natural</div><div class="price">R$22,50</div><button class="btn add" data-id="f3" data-name="Mel Puro" data-price="22.5">Adicionar</button></div>
+    <div class="card" data-cat="food"><h3>Granola Crocante</h3><div class="small">300 g</div><div class="meta">Aveia e frutas</div><div class="price">R$14,80</div><button class="btn add" data-id="f4" data-name="Granola Crocante" data-price="14.8">Adicionar</button></div>
+    <div class="card" data-cat="food"><h3>Barra de Proteína</h3><div class="small">50 g</div><div class="meta">Snack proteico</div><div class="price">R$6,50</div><button class="btn add" data-id="f5" data-name="Barra de Proteína" data-price="6.5">Adicionar</button></div>
+    <div class="card" data-cat="food"><h3>Bebida Proteica</h3><div class="small">330ml</div><div class="meta">Baunilha</div><div class="price">R$7,90</div><button class="btn add" data-id="f6" data-name="Bebida Proteica" data-price="7.9">Adicionar</button></div>
+  </section>
+
+  <!-- Carrinho -->
+  <div id="cart" class="hidden" role="dialog" aria-labelledby="cart-title" aria-modal="true">
+    <strong id="cart-title">Seu Carrinho</strong>
+    <div id="items" style="margin:14px 0;max-height:50vh;overflow-y:auto"></div>
+    <div class="total">Total: R$ <span id="total">0,00</span></div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button id="clear" class="btn" style="flex:1">Limpar</button>
+      <button id="close" class="btn" style="flex:1;background:var(--brand);color:#fff;border-color:var(--brand)">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+</div>
+
+<script>
+/* === Estado e Persistência === */
+const root = document.documentElement;
+const splash = document.getElementById('splash');
+const mainContent = document.getElementById('mainContent');
+const enterBtn = document.getElementById('enterBtn');
+const themeBtn = document.getElementById('theme');
+const q = document.getElementById('q');
+const filters = document.getElementById('filters');
+const cartBtn = document.getElementById('cartBtn');
+const countEl = document.getElementById('count');
+const cartEl = document.getElementById('cart');
+const itemsEl = document.getElementById('items');
+const totalEl = document.getElementById('total');
+const toast = document.getElementById('toast');
+
+let theme = localStorage.getItem('theme') || 'pink';
+let activeCat = 'all';
+let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+/* === Tela de Início === */
+enterBtn.onclick = () => {
+  splash.classList.add('hidden');
+  setTimeout(() => {
+    mainContent.classList.add('visible');
+    splash.style.display = 'none';
+    updateCartUI();
+    applyFilter();
+  }, 800);
+};
+
+/* === Temas === */
+const themes = ['pink', 'green', 'neutral', 'dark'];
+let themeIndex = themes.indexOf(theme);
+function cycleTheme() {
+  themeIndex = (themeIndex + 1) % themes.length;
+  theme = themes[themeIndex];
+  root.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  themeBtn.innerHTML = getThemeLabel();
+}
+function getThemeLabel() {
+  const labels = {pink:'Rosa', green:'Verde', neutral:'Neutro', dark:'Escuro'};
+  return labels[theme];
+}
+themeBtn.innerHTML = getThemeLabel();
+themeBtn.onclick = cycleTheme;
+root.setAttribute('data-theme', theme);
+
+/* === Filtro e Busca === */
+filters.onclick = e => {
+  const btn = e.target.closest('button[data-cat]');
+  if (!btn) return;
+  document.querySelectorAll('#filters button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  btn.setAttribute('aria-pressed', 'true');
+  activeCat = btn.dataset.cat;
+  applyFilter();
+};
+q.oninput = () => applyFilter();
+
+function applyFilter() {
+  const term = q.value.toLowerCase();
+  const cards = document.querySelectorAll('#products .card');
+  cards.forEach((card, i) => {
+    const title = card.querySelector('h3').textContent.toLowerCase();
+    const cat = card.dataset.cat;
+    const matchCat = activeCat === 'all' || activeCat === cat;
+    const matchSearch = term === '' || title.includes(term);
+    const visible = matchCat && matchSearch;
+    card.style.display = visible ? '' : 'none';
+    const h3 = card.querySelector('h3');
+    if (visible && term) {
+      h3.innerHTML = title.replace(new RegExp(term, 'gi'), match => `<span class="highlight">${match}</span>`);
+    } else if (visible) {
+      h3.textContent = h3.dataset.original || h3.textContent;
+      h3.dataset.original = h3.textContent;
+    }
+  });
+}
+
+/* === Carrinho === */
+function saveCart() {
+  localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartUI();
+}
+function updateCartUI() {
+  const totalItems = cart.reduce((s, i) => s + i.qty, 0);
+  countEl.textContent = totalItems;
+  itemsEl.innerHTML = '';
+  const total = cart.reduce((s, i) => s + i.qty * i.price, 0);
+  cart.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'cart-item';
+    div.innerHTML = `
+      <div>
+        <div style="font-weight:600;font-size:0.95rem">${item.name}</div>
+        <div class="small">R$${(item.price).toFixed(2).replace('.',',')} unid.</div>
+      </div>
+      <div class="qty-controls" style="display:flex;gap:6px;align-items:center">
+        <button aria-label="Remover um" data-id="${item.id}">-</button>
+        <span style="min-width:20px;text-align:center">${item.qty}</span>
+        <button aria-label="Adicionar um" data-id="${item.id}">+</button>
+      </div>
+      <button class="small" style="color:var(--brand);margin-left:8px" data-remove="${item.id}">Remover</button>
+    `;
+    itemsEl.appendChild(div);
+  });
+  totalEl.textContent = total.toFixed(2).replace('.', ',');
+  if (cart.length === 0) itemsEl.innerHTML = '<div class="small" style="text-align:center;color:var(--muted)">Carrinho vazio</div>';
+}
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// Adicionar ao carrinho
+document.querySelectorAll('.add').forEach(btn => {
+  btn.onclick = () => {
+    const {id, name, price} = btn.dataset;
+    const numPrice = parseFloat(price);
+    const existing = cart.find(i => i.id === id);
+    if (existing) existing.qty++;
+    else cart.push({id, name, price: numPrice, qty: 1});
+    saveCart();
+    showToast(`${name} adicionado!`);
+    btn.style.background = 'var(--brand)';
+    btn.style.color = '#fff';
+    setTimeout(() => { btn.style.background = ''; btn.style.color = ''; }, 300);
+  };
+});
+
+// Controles do carrinho
+itemsEl.onclick = e => {
+  const target = e.target;
+  const id = target.dataset.id || target.dataset.remove;
+  if (!id) return;
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  if (target.tagName === 'BUTTON' && !target.dataset.remove) {
+    if (target.textContent === '+') item.qty++;
+    if (target.textContent === '-' && item.qty > 1) item.qty--;
+  }
+  if (target.dataset.remove || (target.textContent === '-' && item.qty === 1)) {
+    cart = cart.filter(i => i.id !== id);
+  }
+  saveCart();
+};
+
+cartBtn.onclick = () => {
+  cartEl.classList.toggle('hidden');
+  cartEl.classList.toggle('open');
+  if (!cartEl.classList.contains('hidden')) updateCartUI();
+};
+document.getElementById('close').onclick = () => cartEl.classList.add('hidden');
+document.getElementById('clear').onclick = () => { cart = []; saveCart(); showToast('Carrinho limpo'); };
+
+/* === Inicialização === */
+setTimeout(() => {
+  if (splash && !splash.classList.contains('hidden')) {
+    // enterBtn.click(); // Descomente para pular splash
+  }
+}, 100);
+</script>
+</body>
+</html>
